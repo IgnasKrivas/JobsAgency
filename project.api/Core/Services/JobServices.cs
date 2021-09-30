@@ -36,16 +36,19 @@ namespace project.api.Core.Services
             _context.SaveChanges();
         }
 
-        public Job GetJob(int userId, int id)
+        public Job GetJob(int id)
         {
-            return _context.Jobs.Where(x => x.User.Id == userId 
-                                        && x.JobId == id)
+            return _context.Jobs.Where(x => x.JobId == id)
                                 .SingleOrDefault();
         }
 
-        public List<Job> GetJobs(int userId)
+        public List<Job> GetJobsFromUser(int userId)
         {
             return _context.Jobs.Where(x => x.User.Id == userId).ToList();
+        }
+        public List<Job> GetJobs()
+        {
+            return _context.Jobs.ToList();
         }
     }
 }

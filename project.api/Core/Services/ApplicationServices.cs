@@ -36,16 +36,23 @@ namespace project.api.Core.Services
             _context.SaveChanges();
         }
 
-        public Application GetApplication(int jobId,int id)
+        public Application GetApplication(int id)
         {
-            return _context.Applications.Where(e => e.ApplicationId == id
-                                                && e.Job.JobId == jobId)
+            return _context.Applications.Where(e => e.ApplicationId == id)
                                         .SingleOrDefault();
         }
 
-        public List<Application> GetApplications(int jobId)
+        public List<Application> GetApplications()
+        {
+            return _context.Applications.ToList();
+        }
+        public List<Application> GetApplicationsFromJob(int jobId)
         {
             return _context.Applications.Where(x => x.Job.JobId == jobId).ToList();
+        }
+        public List<Application> GetApplicationsFromUser(int userId)
+        {
+            return _context.Applications.Where(x => x.Candidate.Id == userId).ToList();
         }
     }
 }

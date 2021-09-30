@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace project.api.Controllers
 {
     [ApiController]
-    [Route("Application/{applicationId}/[controller]")]
+    [Route("[controller]")]
     public class SkillController : ControllerBase
     {
         private readonly ISkillServices _skillServices;
@@ -27,15 +27,22 @@ namespace project.api.Controllers
         }
         
         [HttpGet]
-        public IActionResult GetSkills(int applicationId)
+        [Route("~/Application/{applicationId}/[controller]")]
+        public IActionResult GetSkillsFromApplication(int applicationId)
         {
-            return Ok(_skillServices.GetSkills(applicationId)); 
+            return Ok(_skillServices.GetSkillsFromApplication(applicationId)); 
+        }
+
+        [HttpGet]
+        public IActionResult GetSkills()
+        {
+            return Ok(_skillServices.GetSkills());
         }
 
         [HttpGet("{id}", Name = "GetSkill")]
-        public IActionResult GetSkill(int applicationId, int id)
+        public IActionResult GetSkill(int id)
         {
-            var CurJob = _skillServices.GetSkill(applicationId, id);
+            var CurJob = _skillServices.GetSkill(id);
             if (CurJob == null)
             {
                 return NotFound("Skill Not Found");
@@ -44,39 +51,38 @@ namespace project.api.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateSkill(int applicationId,CreateSkillDTO skillDTO)
+        public IActionResult CreateSkill(CreateSkillDTO skillDTO)
         {
 
-            if (!_context.Applications.Any(x => x.ApplicationId == applicationId))
+            if (!_context.Applications.Any(x => x.ApplicationId == skillDTO.ApplicationId))
             {
                 return NotFound("Application does not exists");
             }
             var skill = _mapper.Map<Skill>(skillDTO);
-            skill.ApplicationId = applicationId;
 
             var newSkill = _skillServices.CreateSkill(skill);
-            return CreatedAtAction("GetSkill", new { applicationId = applicationId, id = newSkill.SkillId }, newSkill);
+            return CreatedAtAction("GetSkill", new { applicationId = newSkill.ApplicationId, id = newSkill.SkillId }, newSkill);
         }
         [HttpPut("{id}")]
-        public IActionResult EditSkill(int applicationId, int id, CreateSkillDTO skillDTO)
+        public IActionResult EditSkill(int id, UpdateSkillDTO skillDTO)
         {
             if (!_context.Skills.Any(x => x.SkillId == id))
             {
                 return NotFound("Skill with that id doesnt exist");
             }
-            var oldSkill = _skillServices.GetSkill(applicationId, id);
+            var oldSkill = _skillServices.GetSkill(id);
             if (oldSkill == null)
                 return NotFound("Skill Not Found");
             _mapper.Map(skillDTO, oldSkill);
 
             _skillServices.EditSkill(oldSkill);
-            var newSkill = _skillServices.GetSkill(applicationId, id);
+            var newSkill = _skillServices.GetSkill(id);
             return Ok(newSkill);
         }
         [HttpDelete("{id}")]
-        public IActionResult DeleteSkill(int applicationId, int id)
+        public IActionResult DeleteSkill(int id)
         {
-            var skill = _skillServices.GetSkill(applicationId, id);
+            var skill = _skillServices.GetSkill(id);
             if (skill == null)
             {
                 return NotFound("Skill Not Found");

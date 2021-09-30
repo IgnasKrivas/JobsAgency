@@ -36,18 +36,21 @@ namespace project.api.Core.Services
             _context.SaveChanges();
         }
 
-        public Skill GetSkill(int applicationId, int id)
+        public Skill GetSkill(int id)
         {
-            return _context.Skills.Where(x => x.SkillId == id
-                                        && x.Application.ApplicationId == applicationId)
-                                .SingleOrDefault();
+            return _context.Skills.Where(x => x.SkillId == id)
+                                  .SingleOrDefault();
         }
 
-        public List<Skill> GetSkills(int applicationId)
+        public List<Skill> GetSkills()
+        {
+            return _context.Skills.ToList();
+        }
+
+        public List<Skill> GetSkillsFromApplication(int applicationId)
         {
             return _context.Skills.Where(x => x.Application.ApplicationId == applicationId)
                                         .ToList();
-           
         }
     }
 }

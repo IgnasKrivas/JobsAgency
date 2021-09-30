@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace project.api.Controllers
 {
     [ApiController]
-    [Route("Job/{jobId}/[controller]")]
+    [Route("[controller]")]
     public class ApplicationController : ControllerBase
     {
         private readonly IApplicationServices _applicationServices;
@@ -28,15 +28,28 @@ namespace project.api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetApplications(int jobId)
+        [Route("~/Job/{jobId}/[controller]")]
+        public IActionResult GetApplicationsFromJob(int jobId)
         {         
-            return Ok(_applicationServices.GetApplications(jobId));
+            return Ok(_applicationServices.GetApplicationsFromJob(jobId));
+        }
+
+        [HttpGet]
+        [Route("~/User/{userId}/[controller]")]
+        public IActionResult GetApplicationsFromUser(int userId)
+        {
+            return Ok(_applicationServices.GetApplicationsFromUser(userId));
+        }
+        [HttpGet]
+        public IActionResult GetApplications()
+        {
+            return Ok(_applicationServices.GetApplications());
         }
 
         [HttpGet("{id}", Name = "GetApplication")]
-        public IActionResult GetApplication(int jobId, int id)
+        public IActionResult GetApplication(int id)
         {
-            var CurApplication = _applicationServices.GetApplication(jobId, id);
+            var CurApplication = _applicationServices.GetApplication(id);
             if (CurApplication == null)
             {
                 return NotFound("Application Not Found");
@@ -45,45 +58,44 @@ namespace project.api.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateApplication(int jobId, CreateApplicationDTO application)
+        public IActionResult CreateApplication(CreateApplicationDTO application)
         {
             if (!_context.Users.Any(x => x.Id == application.CandidateId))
             {
                 return NotFound("User does not exists");
             }
-            if (!_context.Jobs.Any(x => x.JobId == jobId))
+            if (!_context.Jobs.Any(x => x.JobId == application.JobId))
             {
                 return NotFound("Job does not exists");
             }
 
             var app = _mapper.Map<Application>(application);
-            app.JobId = jobId;
 
             var newApplication = _applicationServices.CreateApplication(app);
-            return CreatedAtAction("GetApplication", new { jobId = jobId , id = newApplication.ApplicationId},newApplication);
+            return CreatedAtAction("GetApplication", new { jobId = newApplication.JobId , id = newApplication.ApplicationId},newApplication);
         }
 
         [HttpPut("{id}")]
-        public IActionResult EditApplication(int jobId, int id, UpdateApplicationDTO application)
+        public IActionResult EditApplication(int id, UpdateApplicationDTO application)
         {
             if (!_context.Applications.Any(x => x.ApplicationId == id))
             {
                 return NotFound("Application with that id doesnt exist");
             }
-            var oldApp = _applicationServices.GetApplication(jobId, id);
+            var oldApp = _applicationServices.GetApplication(id);
             if (oldApp == null)
                 return NotFound();
             _mapper.Map(application, oldApp);
 
             _applicationServices.EditApplication(oldApp);
-            var newApp = _applicationServices.GetApplication(jobId, id);
+            var newApp = _applicationServices.GetApplication(id);
             return Ok(newApp);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteApplication(int jobId, int id)
+        public IActionResult DeleteApplication(int id)
         {
-            var app = _applicationServices.GetApplication(jobId, id);
+            var app = _applicationServices.GetApplication(id);
             if(app == null)
             {
                 return NotFound("Application Not Found");

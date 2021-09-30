@@ -17,7 +17,10 @@ namespace project.api.Data.DTO
             CreateMap<UpdateApplicationDTO, Application>();
 
             CreateMap<CreateJobDTO, Job>();
+            CreateMap<UpdateJobDTO, Job>();
+
             CreateMap<CreateSkillDTO, Skill>();
+            CreateMap<UpdateSkillDTO, Skill>();
         }
     }
 }
