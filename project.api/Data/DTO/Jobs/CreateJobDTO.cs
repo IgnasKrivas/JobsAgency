@@ -11,6 +11,6 @@ namespace project.api.Data.DTO.Jobs
         public string Location { get; set; }
         public string Requirements { get; set; }
         public double Salary { get; set; }
-        public int UserId { get; set; }
+       // public int UserId { get; set; }
     }
 }

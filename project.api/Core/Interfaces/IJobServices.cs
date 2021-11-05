@@ -11,8 +11,8 @@ namespace project.api.Core.Interfaces
         List<Job> GetJobs();
         Job GetJob(int id);
         Job CreateJob(Job job);
-        void EditJob(Job job);
-        void DeleteJob(Job job);
+        bool EditJob(Job job);
+        bool DeleteJob(Job job);
 
     }
 }

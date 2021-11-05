@@ -7,13 +7,13 @@ namespace project.api.Core.Interfaces
 {
     public interface IApplicationServices
     {
-        List<Application> GetApplicationsFromUser(int userId);
+        //List<Application> GetApplicationsFromUser(int userId);
         List<Application> GetApplicationsFromJob(int jobId);
         List<Application> GetApplications();
         Application GetApplication(int id);
         Application CreateApplication(Application application);
-        void EditApplication(Application application);
-        void DeleteApplication(Application application);
+        bool EditApplication(Application application);
+        bool DeleteApplication(Application application);
 
     }
 }

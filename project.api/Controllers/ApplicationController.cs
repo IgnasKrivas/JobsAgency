@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace project.api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ApplicationController : ControllerBase
@@ -34,12 +36,12 @@ namespace project.api.Controllers
             return Ok(_applicationServices.GetApplicationsFromJob(jobId));
         }
 
-        [HttpGet]
-        [Route("~/User/{userId}/[controller]")]
-        public IActionResult GetApplicationsFromUser(int userId)
-        {
-            return Ok(_applicationServices.GetApplicationsFromUser(userId));
-        }
+        //[HttpGet]
+        //[Route("~/User/{userId}/[controller]")]
+        //public IActionResult GetApplicationsFromUser(int userId)
+        //{
+        //    return Ok(_applicationServices.GetApplicationsFromUser(userId));
+        //}
         [HttpGet]
         public IActionResult GetApplications()
         {
@@ -60,10 +62,7 @@ namespace project.api.Controllers
         [HttpPost]
         public IActionResult CreateApplication(CreateApplicationDTO application)
         {
-            if (!_context.Users.Any(x => x.Id == application.CandidateId))
-            {
-                return NotFound("User does not exists");
-            }
+
             if (!_context.Jobs.Any(x => x.JobId == application.JobId))
             {
                 return NotFound("Job does not exists");
@@ -78,31 +77,59 @@ namespace project.api.Controllers
         [HttpPut("{id}")]
         public IActionResult EditApplication(int id, UpdateApplicationDTO application)
         {
-            if (!_context.Applications.Any(x => x.ApplicationId == id))
+            try
             {
-                return NotFound("Application with that id doesnt exist");
-            }
-            var oldApp = _applicationServices.GetApplication(id);
-            if (oldApp == null)
-                return NotFound();
-            _mapper.Map(application, oldApp);
+                if (!_context.Applications.Any(x => x.ApplicationId == id))
+                {
+                    return NotFound("Application with that id doesnt exist");
+                }
+                var oldApp = _applicationServices.GetApplication(id);
+                if (oldApp == null)
+                    return NotFound();
+                _mapper.Map(application, oldApp);
 
-            _applicationServices.EditApplication(oldApp);
-            var newApp = _applicationServices.GetApplication(id);
-            return Ok(newApp);
+                var edited = _applicationServices.EditApplication(oldApp);
+                if (edited == true)
+                {
+                    var newApp = _applicationServices.GetApplication(id);
+                    return Ok(newApp);
+                }
+                else
+                {
+                    return StatusCode(403, "User can not edit other users Application!");
+                }
+            }
+            catch(ApplicationException e)
+            {
+                return StatusCode(401, e.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteApplication(int id)
         {
-            var app = _applicationServices.GetApplication(id);
-            if(app == null)
+            try
             {
-                return NotFound("Application Not Found");
-            }
-            _applicationServices.DeleteApplication(app);
+                var app = _applicationServices.GetApplication(id);
+                if (app == null)
+                {
+                    return NotFound("Application Not Found");
+                }
+                var deleted = _applicationServices.DeleteApplication(app);
+                if (deleted == true)
+                {
 
-            return NoContent();
+                    return NoContent();
+                }
+                else
+                {
+                    return StatusCode(403, "User can not delete other users Application!");
+                }
+            }
+            catch(ApplicationException e)
+            {
+                return StatusCode(401, e.Message);
+            }
 
         }
         

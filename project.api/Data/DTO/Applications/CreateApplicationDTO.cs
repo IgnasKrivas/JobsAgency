@@ -13,6 +13,6 @@ namespace project.api.Data.DTO.Applications
             public string Experience { get; set; }
             public string Course { get; set; }
             public int JobId { get; set; }
-            public int CandidateId { get; set; }
+           // public int CandidateId { get; set; }
     }
 }

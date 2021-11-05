@@ -15,8 +15,9 @@ namespace project.api.Data.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=db.database.windows.net,1433;Database=project.api_db;User=user;Password=password;Trusted_Connection=False;MultipleActiveResultSets=true");
+            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=JobsDB;Trusted_Connection=True");
             /*@"Server=(localdb)\mssqllocaldb;Database=JobsDB;Trusted_Connection=True"*/
+            //@"Server=projectapidbserver.database.windows.net,1433;Database=project.api_db;User=ignaskrivas;Password=Summoner1;Trusted_Connection=False;MultipleActiveResultSets=true"
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

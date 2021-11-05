@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using project.api.Core.CustomExceptions;
 using project.api.Core.Interfaces;
 using project.api.Data.Context;
 using project.api.Data.DTO.Skills;
@@ -12,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace project.api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class SkillController : ControllerBase
@@ -66,30 +69,61 @@ namespace project.api.Controllers
         [HttpPut("{id}")]
         public IActionResult EditSkill(int id, UpdateSkillDTO skillDTO)
         {
-            if (!_context.Skills.Any(x => x.SkillId == id))
+            try
             {
-                return NotFound("Skill with that id doesnt exist");
-            }
-            var oldSkill = _skillServices.GetSkill(id);
-            if (oldSkill == null)
-                return NotFound("Skill Not Found");
-            _mapper.Map(skillDTO, oldSkill);
+                if (!_context.Skills.Any(x => x.SkillId == id))
+                {
+                    return NotFound("Skill with that id doesnt exist");
+                }
+                var oldSkill = _skillServices.GetSkill(id);
+                if (oldSkill == null)
+                    return NotFound("Skill Not Found");
+                _mapper.Map(skillDTO, oldSkill);
 
-            _skillServices.EditSkill(oldSkill);
-            var newSkill = _skillServices.GetSkill(id);
-            return Ok(newSkill);
+                var edited = _skillServices.EditSkill(oldSkill);
+                if (edited == true)
+                {
+
+
+                    var newSkill = _skillServices.GetSkill(id);
+                    return Ok(newSkill);
+                }
+                else
+                {
+                    return StatusCode(403, "User can not edit other users Skills!");
+                }
+            }
+            catch(SkillException e)
+            {
+                return StatusCode(401, e.Message);
+            }
         }
         [HttpDelete("{id}")]
         public IActionResult DeleteSkill(int id)
         {
-            var skill = _skillServices.GetSkill(id);
-            if (skill == null)
+            try
             {
-                return NotFound("Skill Not Found");
-            }
-            _skillServices.DeleteSkill(skill);
+                var skill = _skillServices.GetSkill(id);
+                if (skill == null)
+                {
+                    return NotFound("Skill Not Found");
+                }
+                var deleted = _skillServices.DeleteSkill(skill);
+                if (deleted == true)
+                {
 
-            return NoContent();
+
+                    return NoContent();
+                }
+                else
+                {
+                    return StatusCode(403, "User can not delete other users Skills!");
+                }
+            }
+            catch(SkillException e)
+            {
+                return StatusCode(401, e.Message);
+            }
 
         }
     }

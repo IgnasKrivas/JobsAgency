@@ -5,9 +5,13 @@ using project.api.Data.Context;
 using project.api.Data.Models;
 using System.Linq;
 using project.api.Data.DTO.Jobs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using project.api.Core.CustomExceptions;
 
 namespace project.api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class JobController : ControllerBase
@@ -15,12 +19,15 @@ namespace project.api.Controllers
         private readonly IJobServices _jobServices;
         private readonly AppDBContext _context;
         private readonly IMapper _mapper;
+        //private readonly Data.Models.User _user;
 
-        public JobController(IJobServices jobServices, AppDBContext context, IMapper mapper)
+        public JobController(IJobServices jobServices, AppDBContext context, IMapper mapper/*,IHttpContextAccessor httpContextAccessor*/)
         {
             _jobServices = jobServices;
             _context = context;
             _mapper = mapper;
+            //_user = _context.Users.
+            //                First(u => u.Username == httpContextAccessor.HttpContext.User.Identity.Name);
         }
 
         [HttpGet]
@@ -28,6 +35,8 @@ namespace project.api.Controllers
         {
             return Ok(_jobServices.GetJobs());
         }
+
+        
 
         [HttpGet]
         [Route("~/User/{userId}/[controller]")]
@@ -50,10 +59,6 @@ namespace project.api.Controllers
         [HttpPost]
         public IActionResult CreateJob(CreateJobDTO job)
         {
-            if (!_context.Users.Any(x => x.Id == job.UserId))
-            {
-                return NotFound("User is not exists");
-            }
 
             var jb = _mapper.Map<Job>(job);
 
@@ -63,30 +68,60 @@ namespace project.api.Controllers
         [HttpPut("{id}")]
         public IActionResult EditJob(int id, UpdateJobDTO job)
         {
-            if (!_context.Jobs.Any(x => x.JobId == id))
+            try
             {
-                return NotFound("Job with that id doesnt exist");
-            }
-            var oldJob = _jobServices.GetJob(id);
-            if (oldJob == null)
-                return NotFound("Job Not Found");
-            _mapper.Map(job, oldJob);
+                if (!_context.Jobs.Any(x => x.JobId == id))
+                {
+                    return NotFound("Job with that id doesnt exist");
+                }
+                var oldJob = _jobServices.GetJob(id);
+                if (oldJob == null)
+                    return NotFound("Job Not Found");
+                _mapper.Map(job, oldJob);
 
-            _jobServices.EditJob(oldJob);
-            var newJob = _jobServices.GetJob(id);
-            return Ok(newJob);
+                var edited = _jobServices.EditJob(oldJob);
+                if (edited == true)
+                {
+              
+
+                    var newJob = _jobServices.GetJob(id);
+                    return Ok(newJob);
+                }
+                else
+                {
+                    return StatusCode(403, "User can not edit other users Job!");
+                }
+            }
+            catch (JobException e)
+            {
+                return StatusCode(401, e.Message);
+            }
         }
         [HttpDelete("{id}")]
         public IActionResult DeleteApplication(int id)
         {
-            var job = _jobServices.GetJob(id);
-            if (job == null)
+            try
             {
-                return NotFound("Job Not Found");
-            }
-            _jobServices.DeleteJob(job);
+                var job = _jobServices.GetJob(id);
+                if (job == null)
+                {
+                    return NotFound("Job Not Found");
+                }
+                var deleted = _jobServices.DeleteJob(job);
+                if (deleted == true)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return StatusCode(403, "User can not delete other users Job!");
+                }
 
-            return NoContent();
+                }
+            catch (JobException e)
+            {
+                return StatusCode(401, e.Message);
+            }
 
         }
     }

@@ -11,8 +11,8 @@ namespace project.api.Core.Interfaces
         List<Skill> GetSkillsFromApplication(int applicationId);
         Skill GetSkill(int id);
         Skill CreateSkill(Skill skill);
-        void EditSkill(Skill skill);
-        void DeleteSkill(Skill skill);
+        bool EditSkill(Skill skill);
+        bool DeleteSkill(Skill skill);
 
     }
 }

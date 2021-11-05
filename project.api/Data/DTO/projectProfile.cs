@@ -5,6 +5,7 @@ using AutoMapper;
 using project.api.Data.DTO.Applications;
 using project.api.Data.DTO.Jobs;
 using project.api.Data.DTO.Skills;
+using project.api.Data.DTO.Users;
 using project.api.Data.Models;
 
 namespace project.api.Data.DTO
@@ -21,6 +22,8 @@ namespace project.api.Data.DTO
 
             CreateMap<CreateSkillDTO, Skill>();
             CreateMap<UpdateSkillDTO, Skill>();
+
+            CreateMap<SignInUser, User>();
         }
     }
 }

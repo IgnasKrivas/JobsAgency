@@ -1,4 +1,5 @@
-﻿using project.api.Core.Interfaces;
+﻿using Microsoft.AspNetCore.Http;
+using project.api.Core.Interfaces;
 using project.api.Data.Context;
 using project.api.Data.Models;
 using System;
@@ -11,29 +12,50 @@ namespace project.api.Core.Services
     public class ApplicationServices : IApplicationServices
     {
         private readonly AppDBContext _context;
-        public ApplicationServices(AppDBContext context)
+        private readonly User _user;
+        public ApplicationServices(AppDBContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _user = _context.Users
+                        .First(u => u.Username == httpContextAccessor.HttpContext.User.Identity.Name);
         }
 
         public Application CreateApplication(Application application)
         {
+            
+            application.CandidateId = _user.Id;
             _context.Add(application);
             _context.SaveChanges();
 
             return application;
         }
 
-        public void DeleteApplication(Application application)
+        public bool DeleteApplication(Application application)
         {
+            var dbApp = _context.Applications.Where(a => a.CandidateId == _user.Id && a.ApplicationId == application.ApplicationId).FirstOrDefault();
+            if (dbApp != null) { 
             _context.Applications.Remove(application);
             _context.SaveChanges();
+                return true;
+        }
+        else{
+                return false;
+        }
         }
 
-        public void EditApplication(Application application)
+        public bool EditApplication(Application application)
         {
-            _context.Applications.Update(application);
-            _context.SaveChanges();
+            var dbApp = _context.Applications.Where(a => a.CandidateId == _user.Id && a.ApplicationId == application.ApplicationId).FirstOrDefault();
+            if (dbApp != null)
+            {
+                _context.Applications.Update(application);
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public Application GetApplication(int id)
@@ -44,15 +66,15 @@ namespace project.api.Core.Services
 
         public List<Application> GetApplications()
         {
-            return _context.Applications.ToList();
+            return _context.Applications.Where(a => a.CandidateId == _user.Id).ToList();
         }
         public List<Application> GetApplicationsFromJob(int jobId)
         {
             return _context.Applications.Where(x => x.Job.JobId == jobId).ToList();
         }
-        public List<Application> GetApplicationsFromUser(int userId)
-        {
-            return _context.Applications.Where(x => x.Candidate.Id == userId).ToList();
-        }
+        //public List<Application> GetApplicationsFromUser(int userId)
+        //{
+        //    return _context.Applications.Where(x => x.Candidate.Id == userId).ToList();
+        //}
     }
 }

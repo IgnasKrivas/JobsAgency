@@ -1,7 +1,6 @@
-﻿using project.api.Data.Models;
-using System;
+﻿using project.api.Data.DTO.Users;
+using project.api.Data.Models;
 using System.Collections.Generic;
-using System.Text;
 
 namespace project.api.Core.Interfaces
 {
@@ -10,6 +9,8 @@ namespace project.api.Core.Interfaces
         List<User> GetUsers();
         User GetUser(int id);
         User CreateUser(User user);
+        AuthenticatedUser SignUp(User user);
+        AuthenticatedUser SignIn(User user);
 
     }
 }
