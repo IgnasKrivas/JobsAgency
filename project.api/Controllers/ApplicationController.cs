@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace project.api.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("[controller]")]
     public class ApplicationController : ControllerBase
@@ -30,6 +30,7 @@ namespace project.api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Employer,Admin")]
         [Route("~/Job/{jobId}/[controller]")]
         public IActionResult GetApplicationsFromJob(int jobId)
         {         
@@ -43,12 +44,14 @@ namespace project.api.Controllers
         //    return Ok(_applicationServices.GetApplicationsFromUser(userId));
         //}
         [HttpGet]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult GetApplications()
         {
             return Ok(_applicationServices.GetApplications());
         }
 
         [HttpGet("{id}", Name = "GetApplication")]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult GetApplication(int id)
         {
             var CurApplication = _applicationServices.GetApplication(id);
@@ -60,6 +63,7 @@ namespace project.api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SimpleUser")]
         public IActionResult CreateApplication(CreateApplicationDTO application)
         {
 
@@ -75,6 +79,7 @@ namespace project.api.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "SimpleUser,Admin")]
         public IActionResult EditApplication(int id, UpdateApplicationDTO application)
         {
             try
@@ -106,6 +111,7 @@ namespace project.api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult DeleteApplication(int id)
         {
             try

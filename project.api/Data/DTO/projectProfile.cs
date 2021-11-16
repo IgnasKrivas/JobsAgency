@@ -24,6 +24,9 @@ namespace project.api.Data.DTO
             CreateMap<UpdateSkillDTO, Skill>();
 
             CreateMap<SignInUser, User>();
+            CreateMap<UserDTO, User>();
+
+            CreateMap<User, UserDTO>();
         }
     }
 }

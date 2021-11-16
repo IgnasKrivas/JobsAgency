@@ -17,7 +17,8 @@ namespace project.api.Data.Models
         [JsonIgnore]
         public ICollection<Application> Applications { get; set; }
         //[ForeignKey("UserId")]
-        public int UserId { get; set; }
+        [Required]
+        public string UserId { get; set; }
         [JsonIgnore]
         public User User { get; set; }
     }

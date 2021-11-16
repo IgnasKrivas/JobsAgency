@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace project.api.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("[controller]")]
     public class SkillController : ControllerBase
@@ -30,6 +30,7 @@ namespace project.api.Controllers
         }
         
         [HttpGet]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         [Route("~/Application/{applicationId}/[controller]")]
         public IActionResult GetSkillsFromApplication(int applicationId)
         {
@@ -37,12 +38,14 @@ namespace project.api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult GetSkills()
         {
             return Ok(_skillServices.GetSkills());
         }
 
         [HttpGet("{id}", Name = "GetSkill")]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult GetSkill(int id)
         {
             var CurJob = _skillServices.GetSkill(id);
@@ -54,6 +57,7 @@ namespace project.api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SimpleUser,Admin")]
         public IActionResult CreateSkill(CreateSkillDTO skillDTO)
         {
 
@@ -67,6 +71,7 @@ namespace project.api.Controllers
             return CreatedAtAction("GetSkill", new { applicationId = newSkill.ApplicationId, id = newSkill.SkillId }, newSkill);
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "SimpleUser,Admin")]
         public IActionResult EditSkill(int id, UpdateSkillDTO skillDTO)
         {
             try
@@ -99,6 +104,7 @@ namespace project.api.Controllers
             }
         }
         [HttpDelete("{id}")]
+        [Authorize(Roles = "SimpleUser,Admin")]
         public IActionResult DeleteSkill(int id)
         {
             try

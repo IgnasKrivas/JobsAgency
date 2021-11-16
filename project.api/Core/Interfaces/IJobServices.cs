@@ -7,7 +7,7 @@ namespace project.api.Core.Interfaces
 {
     public interface IJobServices
     {
-        List<Job> GetJobsFromUser(int userId);
+        List<Job> GetJobsFromUser(string userId);
         List<Job> GetJobs();
         Job GetJob(int id);
         Job CreateJob(Job job);

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,8 +17,11 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using project.api.Core.Interfaces;
 using project.api.Core.Services;
+using project.api.Core.Utilities;
+using project.api.Data;
 using project.api.Data.Context;
 using project.api.Data.DTO;
+using project.api.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,12 +32,13 @@ namespace project.api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IConfiguration Configuration;
+        public Startup(IConfiguration _configuration)
         {
-            Configuration = configuration;
+            Configuration = _configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        //public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -45,14 +50,20 @@ namespace project.api
             });
 
             IMapper mapper = mappingConfig.CreateMapper();
+            services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<AppDBContext>()
+                .AddDefaultTokenProviders();
+                
             services.AddSingleton(mapper);
             services.AddDbContext<AppDBContext>();
             services.AddTransient<IJobServices, JobServices>();
-            services.AddTransient<IUserServices, UserServices>();
+            //services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISkillServices, SkillServices>();
             services.AddTransient<IApplicationServices, ApplicationServices>();
             services.AddTransient<IPasswordHasher, PasswordHasher>();
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<ITokenManager, JwtGenerator>();
+            services.AddTransient<DatabaseSeeder, DatabaseSeeder>();
             //services.AddSwaggerDocument(settings =>
             //{
             //    settings.Title = "Jobs Agency";
@@ -79,25 +90,43 @@ namespace project.api
             {
                 cfg.AddProfile(new projectProfile());
             });
-            var secret = Environment.GetEnvironmentVariable("JWT_SECRET");
-            var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+            var secret = Configuration["JWT:JWT_SECRET"];
+            var issuer = Configuration["JWT:VALIDISSUER"];
+            var audience = Configuration["JWT:VALIDAUDIENCE"];
 
             services.AddAuthentication(opts =>
             {
                 opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            }).AddJwtBearer(opts =>
+            }).AddJwtBearer(options =>
             {
-                opts.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
                     ValidIssuer = issuer,
-                    ValidateAudience = false,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret))
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero // To immediately reject the access token
                 };
             });
-           
+            //}).AddJwtBearer(opts =>
+            //{
+            //    opts.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        //ValidateIssuerSigningKey = true,
+            //        ValidIssuer = issuer,
+            //        ValidAudience = audience,
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret))
+            //    };
+            //});
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

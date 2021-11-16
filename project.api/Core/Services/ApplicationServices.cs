@@ -17,12 +17,12 @@ namespace project.api.Core.Services
         {
             _context = context;
             _user = _context.Users
-                        .First(u => u.Username == httpContextAccessor.HttpContext.User.Identity.Name);
+                        .First(u => u.UserName == httpContextAccessor.HttpContext.User.Identity.Name);
         }
 
         public Application CreateApplication(Application application)
         {
-            
+
             application.CandidateId = _user.Id;
             _context.Add(application);
             _context.SaveChanges();
@@ -33,14 +33,16 @@ namespace project.api.Core.Services
         public bool DeleteApplication(Application application)
         {
             var dbApp = _context.Applications.Where(a => a.CandidateId == _user.Id && a.ApplicationId == application.ApplicationId).FirstOrDefault();
-            if (dbApp != null) { 
-            _context.Applications.Remove(application);
-            _context.SaveChanges();
+            if (dbApp != null)
+            {
+                _context.Applications.Remove(application);
+                _context.SaveChanges();
                 return true;
-        }
-        else{
+            }
+            else
+            {
                 return false;
-        }
+            }
         }
 
         public bool EditApplication(Application application)
@@ -63,7 +65,6 @@ namespace project.api.Core.Services
             return _context.Applications.Where(e => e.ApplicationId == id)
                                         .SingleOrDefault();
         }
-
         public List<Application> GetApplications()
         {
             return _context.Applications.Where(a => a.CandidateId == _user.Id).ToList();
@@ -72,7 +73,7 @@ namespace project.api.Core.Services
         {
             return _context.Applications.Where(x => x.Job.JobId == jobId).ToList();
         }
-        //public List<Application> GetApplicationsFromUser(int userId)
+        //public List<Application> GetApplicationsFromUser(string userId)
         //{
         //    return _context.Applications.Where(x => x.Candidate.Id == userId).ToList();
         //}

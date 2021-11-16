@@ -8,10 +8,11 @@ using project.api.Data.DTO.Jobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using project.api.Core.CustomExceptions;
+using project.api.Core.Utilities;
 
 namespace project.api.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("[controller]")]
     public class JobController : ControllerBase
@@ -19,33 +20,37 @@ namespace project.api.Controllers
         private readonly IJobServices _jobServices;
         private readonly AppDBContext _context;
         private readonly IMapper _mapper;
-        //private readonly Data.Models.User _user;
+        private readonly Data.Models.User _user;
 
-        public JobController(IJobServices jobServices, AppDBContext context, IMapper mapper/*,IHttpContextAccessor httpContextAccessor*/)
+        public JobController(IJobServices jobServices, AppDBContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _jobServices = jobServices;
             _context = context;
             _mapper = mapper;
-            //_user = _context.Users.
-            //                First(u => u.Username == httpContextAccessor.HttpContext.User.Identity.Name);
+            _user = _context.Users.
+                            First(u => u.UserName == httpContextAccessor.HttpContext.User.Identity.Name);
         }
 
         [HttpGet]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult GetJobs()
         {
+            var user = User;
             return Ok(_jobServices.GetJobs());
         }
 
         
 
-        [HttpGet]
-        [Route("~/User/{userId}/[controller]")]
-        public IActionResult GetJobsFromUser(int userId)
-        {
-            return Ok(_jobServices.GetJobsFromUser(userId));
-        }
+        //[HttpGet]
+        //[Authorize(Roles = "SimpleUser,Employer,Admin")]
+        //[Route("~/User/{userId}/[controller]")]
+        //public IActionResult GetJobsFromUser(string userId)
+        //{
+        //    return Ok(_jobServices.GetJobsFromUser(userId));
+        //}
 
         [HttpGet("{id}", Name = "GetJob")]
+        [Authorize(Roles = "SimpleUser,Employer,Admin")]
         public IActionResult GetJob(int id)
         {
             var CurJob = _jobServices.GetJob(id);
@@ -56,6 +61,7 @@ namespace project.api.Controllers
             return Ok(CurJob);
         }
 
+        [Authorize(Roles = Roles.Employer)]
         [HttpPost]
         public IActionResult CreateJob(CreateJobDTO job)
         {
@@ -65,6 +71,7 @@ namespace project.api.Controllers
             var newJob = _jobServices.CreateJob(jb);
             return CreatedAtAction("GetJob", new { userId = newJob.UserId, id = newJob.JobId }, newJob);
         }
+        [Authorize(Roles = "Employer,Admin")]
         [HttpPut("{id}")]
         public IActionResult EditJob(int id, UpdateJobDTO job)
         {
@@ -97,8 +104,9 @@ namespace project.api.Controllers
                 return StatusCode(401, e.Message);
             }
         }
+        [Authorize(Roles = "Employer,Admin")]
         [HttpDelete("{id}")]
-        public IActionResult DeleteApplication(int id)
+        public IActionResult DeleteJob(int id)
         {
             try
             {

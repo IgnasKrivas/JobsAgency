@@ -24,10 +24,11 @@ namespace project.api.Data.Models
         [JsonIgnore]
         public Job Job { get; set; }
         //[ForeignKey("UserId")]
-        public int CandidateId { get; set; }
+        [Required]
+        public string CandidateId { get; set; }
         [JsonIgnore]
         public User Candidate { get; set; }
-    
+
 
         // User Id
         //  Offering Id

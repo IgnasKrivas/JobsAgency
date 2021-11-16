@@ -17,7 +17,7 @@ namespace project.api.Core.Services
         {
             _context = context;
             _user = _context.Users
-                       .First(u => u.Username == httpContextAccessor.HttpContext.User.Identity.Name);
+                       .First(u => u.UserName == httpContextAccessor.HttpContext.User.Identity.Name);
         }
 
         public Skill CreateSkill(Skill skill)
@@ -27,7 +27,7 @@ namespace project.api.Core.Services
             {
                 _context.Add(skill);
                 _context.SaveChanges();
-               // return skill;
+                // return skill;
             }
             return skill;
             //return skill;
@@ -54,7 +54,7 @@ namespace project.api.Core.Services
             if (dbSkill != null)
             {
                 _context.Skills.Update(skill);
-            _context.SaveChanges();
+                _context.SaveChanges();
                 return true;
             }
             else
@@ -68,6 +68,11 @@ namespace project.api.Core.Services
             return _context.Skills.Where(x => x.SkillId == id)
                                   .SingleOrDefault();
         }
+
+        //public List<Skill> GetSkills()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public List<Skill> GetSkills()
         {

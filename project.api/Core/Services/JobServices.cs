@@ -18,8 +18,9 @@ namespace project.api.Core.Services
         {
             _context = context;
             _user = _context.Users
-                        .First(u => u.Username == httpContextAccessor.HttpContext.User.Identity.Name);
+                        .First(u => u.UserName == httpContextAccessor.HttpContext.User.Identity.Name);
         }
+
 
         public Job CreateJob(Job job)
         {
@@ -32,8 +33,8 @@ namespace project.api.Core.Services
 
         public bool DeleteJob(Job job)
         {
-            
-                var dbJob = _context.Jobs.Where(j => j.UserId == _user.Id && j.JobId == job.JobId).FirstOrDefault();
+
+            var dbJob = _context.Jobs.Where(j => j.UserId == _user.Id && j.JobId == job.JobId).FirstOrDefault();
 
             if (dbJob != null)
             {
@@ -45,18 +46,18 @@ namespace project.api.Core.Services
             {
                 return false;
             }
-        
+
         }
 
         public bool EditJob(Job job)
         {
 
             var dbJob = _context.Jobs.Where(j => j.UserId == _user.Id && j.JobId == job.JobId).FirstOrDefault();
-            if (dbJob != null) 
+            if (dbJob != null)
             {
-               _context.Jobs.Update(dbJob);
-               _context.SaveChanges();
-            return true;
+                _context.Jobs.Update(dbJob);
+                _context.SaveChanges();
+                return true;
             }
             else
             {
@@ -71,7 +72,7 @@ namespace project.api.Core.Services
                                 .SingleOrDefault();
         }
 
-        public List<Job> GetJobsFromUser(int userId)
+        public List<Job> GetJobsFromUser(string userId)
         {
             return _context.Jobs.Where(x => x.User.Id == userId).ToList();
         }
@@ -79,5 +80,7 @@ namespace project.api.Core.Services
         {
             return _context.Jobs.ToList();
         }
+
+       
     }
 }
