@@ -19,7 +19,7 @@ namespace project.api.Data.Context
         {
             optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=JobsDBv3;Trusted_Connection=True");
             /*@"Server=(localdb)\mssqllocaldb;Database=JobsDB;Trusted_Connection=True"*/
-            //@"Server=projectapidbserver.database.windows.net,1433;Database=project.api_db;User=ignaskrivas;Password=Summoner1;Trusted_Connection=False;MultipleActiveResultSets=true"
+           
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
